@@ -51,17 +51,18 @@
     padding: 14px 16px; margin-bottom: 22px;
   }
   .filter-box .section-title{ color: var(--gold); margin-bottom: 8px; }
-  .filter-row{ display:flex; gap:8px; }
+  .filter-row{ display:flex; flex-direction: column; gap:10px; }
   .filter-row input{
-    flex:1; border: 1px solid rgba(244,236,216,.25); border-radius: 10px; padding: 9px 10px;
+    width: 100%; border: 1px solid rgba(244,236,216,.25); border-radius: 10px; padding: 10px 12px;
     font-family: inherit; font-size: 13px; background: rgba(255,255,255,.92); color: var(--ink);
   }
-  .filter-row button{
-    appearance:none; border:none; font-family: inherit; font-weight: 700; font-size: 12.5px;
-    padding: 0 14px; border-radius: 10px; cursor:pointer;
+  .filter-buttons{ display:flex; gap:8px; }
+  .filter-buttons button{
+    flex:1; appearance:none; border:none; font-family: inherit; font-weight: 700; font-size: 12.5px;
+    padding: 10px 8px; border-radius: 10px; cursor:pointer; white-space: nowrap;
   }
-  .filter-row button.apply{ background: var(--lantern); color: #fbe9c9; }
-  .filter-row button.clear{ background: rgba(244,236,216,.12); color: var(--paper); border: 1px solid rgba(244,236,216,.2); }
+  .filter-buttons button.apply{ background: var(--lantern); color: #fbe9c9; }
+  .filter-buttons button.clear{ background: rgba(244,236,216,.12); color: var(--paper); border: 1px solid rgba(244,236,216,.2); }
   .filter-status{ font-size: 12px; color: #cfc4a8; margin-top: 8px; min-height: 16px; }
 
   .stage{ position: relative; width: min(400px, 90vw); }
@@ -152,32 +153,15 @@
     padding: 8px 0; border-bottom: 1px solid rgba(244,236,216,.1); font-size: 13px;
   }
   .saved-item:last-child{ border-bottom:none; }
-  .saved-item .label{ display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .saved-item .label{
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
   .saved-item button{
     background:none; border:none; color: #c98a80; font-size: 12px; cursor:pointer; font-weight:700;
+    flex-shrink: 0; white-space: nowrap;
   }
   .empty-note{ font-size: 12.5px; color: #a89a7c; }
-
-  .io-box{ margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(244,236,216,.12); }
-  .io-title{ font-size: 12.5px; font-weight: 800; color: var(--gold); margin-bottom: 6px; }
-  .io-desc{ font-size: 11.5px; color: #cfc4a8; line-height: 1.6; margin-bottom: 10px; }
-  .io-row{ display:flex; gap:8px; }
-  .io-btn{
-    appearance:none; border: 1px solid rgba(244,236,216,.25); background: rgba(244,236,216,.08);
-    color: var(--paper); font-family: inherit; font-weight: 700; font-size: 12px;
-    padding: 8px 12px; border-radius: 10px; cursor:pointer;
-  }
-  .io-btn:hover{ background: rgba(244,236,216,.16); }
-  .io-textarea{
-    width: 100%; margin-top: 8px; height: 70px; resize: none;
-    border-radius: 10px; border: 1px solid rgba(244,236,216,.2); background: rgba(255,255,255,.06);
-    color: var(--paper); font-size: 11px; font-family: monospace; padding: 8px;
-  }
-  .io-input{
-    flex:1; border: 1px solid rgba(244,236,216,.2); border-radius: 10px; padding: 8px 10px;
-    font-family: inherit; font-size: 12.5px; background: rgba(255,255,255,.9); color: var(--ink);
-  }
-  .io-status{ font-size: 11.5px; color: var(--gold); margin-top: 8px; min-height: 14px; }
 
   .ai-box{
     margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(36,29,20,.2);
@@ -185,13 +169,13 @@
   .ai-box .section-title{ display:flex; align-items:center; gap:6px; }
   .ai-row{ display:flex; gap:8px; margin-top: 8px; }
   .ai-row input{
-    flex:1; border: 1px solid rgba(36,29,20,.25); border-radius: 10px; padding: 9px 10px;
+    flex:1; min-width: 0; border: 1px solid rgba(36,29,20,.25); border-radius: 10px; padding: 9px 10px;
     font-family: inherit; font-size: 13px; background: #fff;
   }
   .ai-row button{
     appearance:none; border:none; background: var(--ink); color: var(--paper);
-    font-family: inherit; font-weight: 700; font-size: 12.5px; padding: 0 14px;
-    border-radius: 10px; cursor:pointer;
+    font-family: inherit; font-weight: 700; font-size: 12.5px; padding: 0 16px;
+    border-radius: 10px; cursor:pointer; flex-shrink: 0; white-space: nowrap;
   }
   .ai-row button:disabled{ opacity:.5; cursor:default; }
   .ai-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top: 8px; }
@@ -223,8 +207,10 @@
   <div class="section-title">🥕 冷蔵庫の中身で絞り込む</div>
   <div class="filter-row">
     <input type="text" id="filterInput" placeholder="例：豚肉, もやし, 卵（カンマ区切り）">
-    <button class="apply" id="filterApply">絞り込む</button>
-    <button class="clear" id="filterClear">クリア</button>
+    <div class="filter-buttons">
+      <button class="apply" id="filterApply">絞り込む</button>
+      <button class="clear" id="filterClear">クリア</button>
+    </div>
   </div>
   <div class="filter-status" id="filterStatus"></div>
 </div>
@@ -246,21 +232,6 @@
 <div class="saved-panel" id="savedPanel">
   <h3>保存済みメニュー</h3>
   <div id="savedList"><div class="empty-note">まだ保存したレシピはないよ</div></div>
-
-  <div class="io-box">
-    <div class="io-title">📋 他の端末に移す（コード）</div>
-    <div class="io-desc">保存済みレシピは、このブラウザなら自動的に残るよ。スマホとPCなど別の端末でも同じリストを見たいときだけ、下の「コードを書き出す」でコピーして、もう一方の端末の「コードを読み込む」に貼り付けてね。</div>
-    <div class="io-row">
-      <button class="io-btn" id="exportBtn">コードを書き出す</button>
-      <button class="io-btn" id="copyBtn" style="display:none;">コピーする</button>
-    </div>
-    <textarea id="exportArea" class="io-textarea" readonly style="display:none;"></textarea>
-    <div class="io-row" style="margin-top:10px;">
-      <input type="text" id="importInput" class="io-input" placeholder="コードをここに貼り付け">
-      <button class="io-btn" id="importBtn">読み込む</button>
-    </div>
-    <div class="io-status" id="ioStatus"></div>
-  </div>
 </div>
 
 <footer>48品（定番／創作・時短／揚げない／鍋ひとつ）の中からランダムに1品セレクト・材料は2人分目安</footer>
@@ -691,64 +662,6 @@ function refreshSavedList(){
     });
   });
 }
-
-// ---- Export / Import (copy-paste code) ----
-const exportBtn = document.getElementById('exportBtn');
-const copyBtn = document.getElementById('copyBtn');
-const exportArea = document.getElementById('exportArea');
-const importInput = document.getElementById('importInput');
-const importBtn = document.getElementById('importBtn');
-const ioStatus = document.getElementById('ioStatus');
-
-exportBtn.addEventListener('click', () => {
-  const ids = Array.from(memoryFallback.keys());
-  if(ids.length === 0){
-    ioStatus.textContent = '保存済みのレシピがまだないよ。先にレシピを保存してみて。';
-    return;
-  }
-  const code = btoa(encodeURIComponent(JSON.stringify(ids)));
-  exportArea.value = code;
-  exportArea.style.display = 'block';
-  copyBtn.style.display = 'inline-block';
-  exportArea.select();
-  ioStatus.textContent = `${ids.length}件のコードを書き出したよ。コピーしてメモしておいてね。`;
-});
-
-copyBtn.addEventListener('click', async () => {
-  try{
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      await navigator.clipboard.writeText(exportArea.value);
-    }else{
-      exportArea.select();
-      document.execCommand('copy');
-    }
-    ioStatus.textContent = 'コピーしたよ！メモアプリなどに貼り付けて保存しておいて。';
-  }catch(e){
-    exportArea.select();
-    ioStatus.textContent = 'コピーがうまくいかなかったので、選択された文字を手動でコピーしてね。';
-  }
-});
-
-importBtn.addEventListener('click', () => {
-  const raw = importInput.value.trim();
-  if(!raw){ ioStatus.textContent = 'コードを貼り付けてから読み込んでね。'; return; }
-  try{
-    const ids = JSON.parse(decodeURIComponent(atob(raw)));
-    if(!Array.isArray(ids)) throw new Error('invalid format');
-    let restored = 0;
-    ids.forEach(id => {
-      const item = MENU.find(m => m.id === id);
-      if(item){ memoryFallback.set(id, item); restored++; }
-    });
-    persistSavedMap(memoryFallback);
-    refreshSavedList();
-    if(current) checkSaved(current.id);
-    ioStatus.textContent = `${restored}件のレシピを復元したよ。`;
-    importInput.value = '';
-  }catch(e){
-    ioStatus.textContent = 'コードが読み込めなかった。コピーしたコードをそのまま貼り付けてみて。';
-  }
-});
 
 let spinning = false;
 btn.addEventListener('click', () => {
