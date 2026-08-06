@@ -204,9 +204,9 @@
 </header>
 
 <div class="filter-box">
-  <div class="section-title">🥕 冷蔵庫の中身で絞り込む</div>
+  <div class="section-title">🥕 食材・ジャンルで絞り込む</div>
   <div class="filter-row">
-    <input type="text" id="filterInput" placeholder="例：豚肉, もやし, 卵（カンマ区切り）">
+    <input type="text" id="filterInput" placeholder="例：豚肉, もやし, 炊飯器, 揚げない（カンマ区切り）">
     <div class="filter-buttons">
       <button class="apply" id="filterApply">絞り込む</button>
       <button class="clear" id="filterClear">クリア</button>
@@ -498,9 +498,16 @@ const filterStatus = document.getElementById('filterStatus');
 
 function getPool(){
   if(filterKeywords.length === 0) return MENU;
-  const matched = MENU.filter(item => item.ing.some(([name]) =>
-    filterKeywords.some(k => name.toLowerCase().includes(k.toLowerCase()))
-  ));
+  const matched = MENU.filter(item => {
+    const ingMatch = item.ing.some(([name]) =>
+      filterKeywords.some(k => name.toLowerCase().includes(k.toLowerCase()))
+    );
+    const tagMatch = (item.tags || []).some(tag => {
+      const cleanTag = tag.replace(/^#/, '').toLowerCase();
+      return filterKeywords.some(k => cleanTag.includes(k.toLowerCase()));
+    });
+    return ingMatch || tagMatch;
+  });
   return matched.length > 0 ? matched : null; // null = no match
 }
 
