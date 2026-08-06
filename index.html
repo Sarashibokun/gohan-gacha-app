@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日のメシガチャ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #191510;
+    --bg2: #12100c;
+    --paper: #f4ecd8;
+    --paper-dim: #e8dcbc;
+    --ink: #241d14;
+    --ink-soft: #5a4f3d;
+    --lantern: #c0392b;
+    --lantern-deep: #8f2a1f;
+    --gold: #d9a441;
+    --green: #4a7c59;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    min-height:100vh;
+    background: radial-gradient(circle at 50% -10%, #2a2116 0%, var(--bg) 45%, var(--bg2) 100%);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    color: var(--paper);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 40px 18px 60px;
+  }
+  .noren{
+    position:fixed; top:0; left:0; right:0; height:14px;
+    background: repeating-linear-gradient(90deg, var(--lantern-deep) 0 2px, transparent 2px 46px);
+    opacity:.55;
+  }
+  header{ text-align:center; margin: 22px 0 30px; }
+  .eyebrow{ letter-spacing: .35em; font-size: 11px; color: var(--gold); font-weight: 700; margin-bottom: 10px; }
+  h1{
+    font-family: 'Shippori Mincho', serif; font-weight: 800;
+    font-size: clamp(28px, 7vw, 42px); margin: 0; letter-spacing: .04em;
+    text-shadow: 0 2px 18px rgba(192,57,43,.25);
+  }
+  .sub{ margin-top: 10px; font-size: 13px; color: #cfc4a8; }
+
+  .filter-box{
+    width: min(400px, 90vw); background: rgba(244,236,216,.06);
+    border: 1px solid rgba(244,236,216,.16); border-radius: 14px;
+    padding: 14px 16px; margin-bottom: 22px;
+  }
+  .filter-box .section-title{ color: var(--gold); margin-bottom: 8px; }
+  .filter-row{ display:flex; gap:8px; }
+  .filter-row input{
+    flex:1; border: 1px solid rgba(244,236,216,.25); border-radius: 10px; padding: 9px 10px;
+    font-family: inherit; font-size: 13px; background: rgba(255,255,255,.92); color: var(--ink);
+  }
+  .filter-row button{
+    appearance:none; border:none; font-family: inherit; font-weight: 700; font-size: 12.5px;
+    padding: 0 14px; border-radius: 10px; cursor:pointer;
+  }
+  .filter-row button.apply{ background: var(--lantern); color: #fbe9c9; }
+  .filter-row button.clear{ background: rgba(244,236,216,.12); color: var(--paper); border: 1px solid rgba(244,236,216,.2); }
+  .filter-status{ font-size: 12px; color: #cfc4a8; margin-top: 8px; min-height: 16px; }
+
+  .stage{ position: relative; width: min(400px, 90vw); }
+
+  .card{
+    background: var(--paper); color: var(--ink); border-radius: 18px;
+    padding: 28px 24px 22px; box-shadow: 0 20px 50px rgba(0,0,0,.45);
+    position: relative; min-height: 260px;
+  }
+  .card.spinning{ animation: shake .09s linear infinite; }
+  @keyframes shake{
+    0%{ transform: rotate(0deg) translateX(0);}
+    25%{ transform: rotate(-1.2deg) translateX(-2px);}
+    75%{ transform: rotate(1.2deg) translateX(2px);}
+    100%{ transform: rotate(0deg) translateX(0);}
+  }
+
+  .top-row{ display:flex; align-items:center; justify-content: space-between; margin-bottom: 14px; }
+  .tag{
+    font-size: 11px; letter-spacing:.15em; color: var(--lantern); font-weight: 700;
+    background: rgba(192,57,43,.08); border: 1px solid rgba(192,57,43,.25);
+    padding: 4px 10px; border-radius: 100px;
+  }
+  .time-badge{
+    font-size: 11.5px; font-weight: 700; color: var(--green);
+    background: rgba(74,124,89,.1); border: 1px solid rgba(74,124,89,.28);
+    padding: 4px 10px; border-radius: 100px;
+  }
+
+  .head{ text-align:center; margin-bottom: 12px; }
+  .emoji{ font-size: 64px; line-height:1; margin-bottom: 8px; filter: drop-shadow(0 8px 14px rgba(0,0,0,.18)); }
+  .name-jp{ font-family: 'Shippori Mincho', serif; font-weight: 800; font-size: 24px; margin: 0 0 3px; }
+  .name-en{ font-size: 11px; letter-spacing: .1em; color: var(--ink-soft); text-transform: uppercase; margin-bottom: 10px; }
+  .caption{ font-size: 13.5px; line-height: 1.6; color: #3a2f20; text-align:center; margin-bottom: 12px; }
+  .hashtags{ font-size: 12px; color: var(--lantern-deep); font-weight: 700; display:flex; flex-wrap:wrap; gap: 6px 10px; justify-content:center; margin-bottom: 8px; }
+
+  .divider{ border:none; border-top: 1px dashed rgba(36,29,20,.2); margin: 14px 0; }
+
+  .section-title{ font-size: 12.5px; font-weight: 800; color: var(--ink); margin: 0 0 8px; letter-spacing: .04em; }
+  ul.ingredients{ list-style:none; padding:0; margin: 0 0 4px; font-size: 13.5px; }
+  ul.ingredients li{
+    display:flex; justify-content: space-between; padding: 5px 0;
+    border-bottom: 1px dotted rgba(36,29,20,.14);
+  }
+  ul.ingredients li span.amt{ color: var(--ink-soft); }
+
+  ol.steps{ padding-left: 20px; margin: 0; font-size: 13.5px; line-height: 1.7; }
+  ol.steps li{ margin-bottom: 6px; }
+  .servings-note{ font-size: 11px; color: var(--ink-soft); margin: 4px 0 10px; }
+
+  .actions{ display:flex; gap: 10px; margin-top: 16px; }
+  .mini-btn{
+    flex:1; appearance:none; border: 1px solid rgba(36,29,20,.2); background: rgba(255,255,255,.4);
+    color: var(--ink); font-family: inherit; font-weight: 700; font-size: 12.5px;
+    padding: 10px 8px; border-radius: 10px; cursor:pointer; transition: background .15s ease;
+  }
+  .mini-btn:hover{ background: rgba(255,255,255,.75); }
+  .mini-btn.saved{ background: var(--green); color: #fff; border-color: var(--green); }
+
+  .placeholder{ text-align:center; color: var(--ink-soft); padding: 30px 0; }
+  .placeholder .emoji{ font-size: 56px; opacity:.5; }
+
+  .btn{
+    margin-top: 26px; appearance:none; border:none; cursor:pointer;
+    background: linear-gradient(180deg, var(--lantern) 0%, var(--lantern-deep) 100%);
+    color: #fbe9c9; font-family: inherit; font-weight: 900; font-size: 15.5px; letter-spacing: .06em;
+    padding: 15px 38px; border-radius: 100px;
+    box-shadow: 0 10px 24px rgba(192,57,43,.35), inset 0 1px 0 rgba(255,255,255,.2);
+    transition: transform .08s ease, box-shadow .2s ease;
+  }
+  .btn:hover{ transform: translateY(-2px); box-shadow: 0 14px 28px rgba(192,57,43,.45); }
+  .btn:active{ transform: translateY(1px) scale(.98); }
+  .hint{ margin-top: 12px; font-size: 11px; color: #8b8069; }
+
+  .saved-toggle{
+    margin-top: 30px; background:none; border: 1px solid rgba(244,236,216,.25); color: var(--paper);
+    font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 9px 18px;
+    border-radius: 100px; cursor:pointer;
+  }
+  .saved-panel{
+    width: min(400px, 90vw); margin-top: 16px; background: rgba(244,236,216,.06);
+    border: 1px solid rgba(244,236,216,.14); border-radius: 14px; padding: 14px 16px; display:none;
+  }
+  .saved-panel.open{ display:block; }
+  .saved-panel h3{ font-size: 13px; margin: 0 0 10px; color: var(--gold); letter-spacing: .04em; }
+  .saved-item{
+    display:flex; align-items:center; justify-content: space-between; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid rgba(244,236,216,.1); font-size: 13px;
+  }
+  .saved-item:last-child{ border-bottom:none; }
+  .saved-item .label{ display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .saved-item button{
+    background:none; border:none; color: #c98a80; font-size: 12px; cursor:pointer; font-weight:700;
+  }
+  .empty-note{ font-size: 12.5px; color: #a89a7c; }
+
+  .io-box{ margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(244,236,216,.12); }
+  .io-title{ font-size: 12.5px; font-weight: 800; color: var(--gold); margin-bottom: 6px; }
+  .io-desc{ font-size: 11.5px; color: #cfc4a8; line-height: 1.6; margin-bottom: 10px; }
+  .io-row{ display:flex; gap:8px; }
+  .io-btn{
+    appearance:none; border: 1px solid rgba(244,236,216,.25); background: rgba(244,236,216,.08);
+    color: var(--paper); font-family: inherit; font-weight: 700; font-size: 12px;
+    padding: 8px 12px; border-radius: 10px; cursor:pointer;
+  }
+  .io-btn:hover{ background: rgba(244,236,216,.16); }
+  .io-textarea{
+    width: 100%; margin-top: 8px; height: 70px; resize: none;
+    border-radius: 10px; border: 1px solid rgba(244,236,216,.2); background: rgba(255,255,255,.06);
+    color: var(--paper); font-size: 11px; font-family: monospace; padding: 8px;
+  }
+  .io-input{
+    flex:1; border: 1px solid rgba(244,236,216,.2); border-radius: 10px; padding: 8px 10px;
+    font-family: inherit; font-size: 12.5px; background: rgba(255,255,255,.9); color: var(--ink);
+  }
+  .io-status{ font-size: 11.5px; color: var(--gold); margin-top: 8px; min-height: 14px; }
+
+  .ai-box{
+    margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(36,29,20,.2);
+  }
+  .ai-box .section-title{ display:flex; align-items:center; gap:6px; }
+  .ai-row{ display:flex; gap:8px; margin-top: 8px; }
+  .ai-row input{
+    flex:1; border: 1px solid rgba(36,29,20,.25); border-radius: 10px; padding: 9px 10px;
+    font-family: inherit; font-size: 13px; background: #fff;
+  }
+  .ai-row button{
+    appearance:none; border:none; background: var(--ink); color: var(--paper);
+    font-family: inherit; font-weight: 700; font-size: 12.5px; padding: 0 14px;
+    border-radius: 10px; cursor:pointer;
+  }
+  .ai-row button:disabled{ opacity:.5; cursor:default; }
+  .ai-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top: 8px; }
+  .ai-chip{
+    font-size: 11.5px; border: 1px solid rgba(36,29,20,.2); background: rgba(255,255,255,.5);
+    border-radius: 100px; padding: 4px 10px; cursor:pointer; color: var(--ink-soft);
+  }
+  .ai-answer{
+    margin-top: 10px; font-size: 13px; line-height: 1.65; background: rgba(255,255,255,.55);
+    border-radius: 10px; padding: 10px 12px; white-space: pre-wrap; display:none;
+  }
+  .ai-answer.show{ display:block; }
+  .ai-loading{ font-size: 12.5px; color: var(--ink-soft); margin-top: 8px; display:none; }
+  .ai-loading.show{ display:block; }
+
+  footer{ margin-top: 36px; font-size: 10.5px; color: #6b604c; text-align:center; letter-spacing: .05em; }
+</style>
+</head>
+<body>
+<div class="noren"></div>
+
+<header>
+  <div class="eyebrow">TONIGHT'S MENU GACHA</div>
+  <h1>今日のメシ、決めよう</h1>
+  <div class="sub">材料・作り方・調理時間つきでランダムに1品</div>
+</header>
+
+<div class="filter-box">
+  <div class="section-title">🥕 冷蔵庫の中身で絞り込む</div>
+  <div class="filter-row">
+    <input type="text" id="filterInput" placeholder="例：豚肉, もやし, 卵（カンマ区切り）">
+    <button class="apply" id="filterApply">絞り込む</button>
+    <button class="clear" id="filterClear">クリア</button>
+  </div>
+  <div class="filter-status" id="filterStatus"></div>
+</div>
+
+<div class="stage">
+  <div class="card" id="card">
+    <div class="placeholder">
+      <div class="emoji">🍽</div>
+      <div class="name-jp">— お品書き待機中 —</div>
+      <div class="caption">ボタンを押して、今夜の一品を引いてみて</div>
+    </div>
+  </div>
+</div>
+
+<button class="btn" id="gachaBtn">メニューを引く</button>
+<div class="hint" id="hint">同じ皿が連続で出ることもあるよ（ご愛嬌）</div>
+
+<button class="saved-toggle" id="savedToggle">♡ 保存したレシピを見る</button>
+<div class="saved-panel" id="savedPanel">
+  <h3>保存済みメニュー</h3>
+  <div id="savedList"><div class="empty-note">まだ保存したレシピはないよ</div></div>
+
+  <div class="io-box">
+    <div class="io-title">📋 他の端末に移す（コード）</div>
+    <div class="io-desc">保存済みレシピは、このブラウザなら自動的に残るよ。スマホとPCなど別の端末でも同じリストを見たいときだけ、下の「コードを書き出す」でコピーして、もう一方の端末の「コードを読み込む」に貼り付けてね。</div>
+    <div class="io-row">
+      <button class="io-btn" id="exportBtn">コードを書き出す</button>
+      <button class="io-btn" id="copyBtn" style="display:none;">コピーする</button>
+    </div>
+    <textarea id="exportArea" class="io-textarea" readonly style="display:none;"></textarea>
+    <div class="io-row" style="margin-top:10px;">
+      <input type="text" id="importInput" class="io-input" placeholder="コードをここに貼り付け">
+      <button class="io-btn" id="importBtn">読み込む</button>
+    </div>
+    <div class="io-status" id="ioStatus"></div>
+  </div>
+</div>
+
+<footer>48品（定番／創作・時短／揚げない／鍋ひとつ）の中からランダムに1品セレクト・材料は2人分目安</footer>
+
+<script>
+const MENU = [
+{id:"tonkotsu", emoji:"🍜", jp:"豚骨ラーメン（簡単版）", en:"Tonkotsu Ramen", cap:"本格スープを煮込まなくても、家にある材料で豚骨風の濃厚さを再現。", tags:["#こってり","#時短"], time:"15分",
+ ing:[["豚ひき肉","150g"],["もやし","1袋"],["水","400ml"],["牛乳","200ml"],["鶏ガラスープの素","大さじ1"],["おろしにんにく","小さじ1"],["塩こしょう","少々"],["中華麺","2玉"],["ねぎ・白ごま・紅生姜","お好みで"]],
+ steps:["鍋に油をひき豚ひき肉を炒め、色が変わったらもやしを加えてさっと炒める。","水・鶏ガラスープの素・おろしにんにくを加えて5分ほど煮る。","牛乳を加えて温め、塩こしょうで味を調える（煮立たせすぎない）。","別鍋で中華麺を茹で、どんぶりに盛ってスープを注ぎ、ねぎ・ごま・紅生姜をのせる。"]},
+
+{id:"shoyu", emoji:"🍥", jp:"醤油ラーメン", en:"Shoyu Ramen", cap:"あっさり澄んだスープが染みる、王道の安心感。", tags:["#あっさり","#定番"], time:"20分",
+ ing:[["中華麺","2玉"],["水","600ml"],["鶏ガラスープの素","大さじ1"],["醤油","大さじ3"],["みりん","大さじ1"],["ごま油","少々"],["チャーシュー（市販）","適量"],["メンマ・ねぎ","お好みで"]],
+ steps:["鍋に水・鶏ガラスープの素を入れて温め、醤油・みりんを加えてスープを作る。","中華麺を袋の表示時間通りに茹でる。","どんぶりにスープを注ぎ、麺を入れる。","チャーシュー・メンマ・ねぎをのせ、仕上げにごま油を垂らす。"]},
+
+{id:"yakiniku", emoji:"🥩", jp:"焼肉盛り合わせ", en:"Yakiniku Platter", cap:"網の上でジュウジュウ。今日は頑張った自分にご褒美。", tags:["#タンから","#ご褒美飯"], time:"20分",
+ ing:[["焼肉用牛肉（カルビ・タンなど）","300g"],["玉ねぎ","1/2個"],["ピーマン","2個"],["焼肉のタレ","適量"],["ごはん","2膳"]],
+ steps:["玉ねぎ・ピーマンを食べやすい大きさに切る。","フライパンまたはグリルを熱し、肉を焼き色がつくまで焼く。","野菜も一緒に焼き、焼肉のタレを絡める。","ごはんと一緒に盛り付ける。"]},
+
+{id:"sushi", emoji:"🍣", jp:"手巻き寿司", en:"Temaki Sushi", cap:"シャリと魚のバランスにこだわる、ちょっと贅沢な夜。", tags:["#寿司","#贅沢"], time:"30分",
+ ing:[["米","2合"],["すし酢","大さじ3"],["刺身盛り合わせ","1パック"],["焼き海苔","1袋"],["わさび・しょうゆ","適量"],["きゅうり・卵焼きなど","お好みで"]],
+ steps:["ごはんを炊き、熱いうちにすし酢を混ぜて冷ます（すし飯）。","刺身や具材を食べやすい大きさに切る。","海苔にすし飯と具材をのせて手巻きにする。","わさび醤油をつけて食べる。"]},
+
+{id:"curry", emoji:"🍛", jp:"スパイスカレー", en:"Spice Curry", cap:"クミン・コリアンダー・ターメリックが層になった、後を引く一皿。", tags:["#スパイス","#やみつき"], time:"50分",
+ ing:[["鶏もも肉","300g"],["玉ねぎ","1個"],["トマト","1個"],["しょうが・にんにく","各1片"],["クミン・コリアンダー・ターメリック","各小さじ1"],["プレーンヨーグルト","大さじ2"],["塩","小さじ1"],["サラダ油","大さじ1"],["ごはん","2膳"]],
+ steps:["鶏肉を一口大に切る。玉ねぎはみじん切り、トマトは粗みじんにする。","鍋で鶏肉を焼き色がつく程度に焼いて取り出す。","同じ鍋で玉ねぎ・しょうが・にんにくを炒め、スパイス・トマト・ヨーグルト・塩を加える。","鶏肉を戻し入れ、焦げないよう混ぜながら弱火で20〜30分煮込む。"]},
+
+{id:"carbonara", emoji:"🍝", jp:"カルボナーラ", en:"Carbonara", cap:"卵とチーズのコクだけで完成する、シンプルの極み。", tags:["#濃厚","#卵好き"], time:"20分",
+ ing:[["パスタ","200g"],["卵","2個"],["粉チーズ","40g"],["ベーコン","80g"],["にんにく","1片"],["黒こしょう","たっぷり"],["オリーブオイル","大さじ1"]],
+ steps:["パスタを塩を入れた湯で茹で始める。","卵と粉チーズを混ぜてソースを作っておく。","フライパンでにんにく・ベーコンを炒める。","茹で上がったパスタと茹で汁少々を加え、火を止めてから卵ソースを絡め、黒こしょうを振る。"]},
+
+{id:"hamburg", emoji:"🍔", jp:"煮込みハンバーグ", en:"Braised Hamburg Steak", cap:"デミグラスがとろける、ナイフを入れる瞬間が好き。", tags:["#洋食","#肉汁"], time:"40分",
+ ing:[["合いびき肉","300g"],["玉ねぎ","1/2個"],["パン粉・牛乳","各大さじ3"],["卵","1個"],["デミグラスソース缶","1缶"],["ケチャップ・中濃ソース","各大さじ1"],["赤ワイン","大さじ2（あれば）"]],
+ steps:["玉ねぎをみじん切りにして炒め、冷ます。","ひき肉・玉ねぎ・パン粉・牛乳・卵を混ぜて成形する。","フライパンで両面を焼き色がつくまで焼く。","デミグラスソース・ケチャップ・中濃ソース・赤ワインを加え、蓋をして10分ほど煮込む。"]},
+
+{id:"gyoza", emoji:"🥟", jp:"羽根つき餃子", en:"Pan-fried Gyoza", cap:"パリッとした羽根とジューシーな餡のコントラスト。", tags:["#パリパリ","#ビール合う"], time:"30分",
+ ing:[["餃子の皮","20枚"],["豚ひき肉","150g"],["キャベツ","150g"],["にら","1/2束"],["しょうが・にんにく","各1片"],["鶏ガラスープの素","小さじ1"],["ごま油","小さじ1"],["薄力粉（羽根用）","小さじ2"],["水（羽根用）","100ml"]],
+ steps:["キャベツをみじん切りにして塩もみし、水気を絞る。","ひき肉・キャベツ・にら・しょうが・にんにく・調味料を混ぜて餡を作る。","皮で包み、フライパンに並べて焼き色をつける。","水溶き薄力粉を回し入れて蓋をし、水分が飛んでパリッとするまで蒸し焼きにする。"]},
+
+{id:"tempura", emoji:"🍤", jp:"天ぷら盛り合わせ", en:"Tempura Assortment", cap:"サクサクの衣で野菜も海老も主役級に。", tags:["#サクサク","#和食"], time:"30分",
+ ing:[["海老","6尾"],["なす・かぼちゃ・ししとうなど","お好みで"],["天ぷら粉","100g"],["冷水","150ml"],["揚げ油","適量"],["天つゆ","適量"]],
+ steps:["具材の水気をよく拭き取る。","天ぷら粉と冷水を軽く混ぜて衣を作る（混ぜすぎない）。","170℃前後の油で具材を揚げる。","油を切って盛り付け、天つゆを添える。"]},
+
+{id:"oyakodon", emoji:"🍚", jp:"親子丼", en:"Oyakodon", cap:"半熟卵でとろっと仕上げる、優しい味の丼。", tags:["#丼もの","#優しい味"], time:"15分",
+ ing:[["鶏もも肉","150g"],["玉ねぎ","1/2個"],["卵","3個"],["めんつゆ（3倍濃縮）","大さじ3"],["水","100ml"],["ごはん","2膳"],["三つ葉","お好みで"]],
+ steps:["鶏肉を一口大に切り、玉ねぎを薄切りにする。","フライパンにめんつゆと水を入れ、鶏肉・玉ねぎを煮る。","溶き卵を回し入れ、半熟になったら火を止める。","ごはんの上にのせ、三つ葉を散らす。"]},
+
+{id:"tonkatsu", emoji:"🐷", jp:"厚切りとんかつ", en:"Thick-cut Tonkatsu", cap:"衣はサク、中はジュワッ。ソースは中濃派？", tags:["#揚げ物","#満足感"], time:"25分",
+ ing:[["豚ロース肉（とんかつ用）","2枚"],["塩こしょう","少々"],["小麦粉・卵・パン粉","各適量"],["揚げ油","適量"],["キャベツ（千切り）","お好みで"],["とんかつソース","適量"]],
+ steps:["豚肉に塩こしょうをして筋を切っておく。","小麦粉・溶き卵・パン粉の順に衣をつける。","170℃の油できつね色になるまで揚げる。","食べやすく切り、キャベツと盛り付けソースをかける。"]},
+
+{id:"soba", emoji:"🥢", jp:"ざる蕎麦", en:"Zaru Soba", cap:"つゆにくぐらせてキリッと啜る、涼やかな一杯。", tags:["#さっぱり","#和食"], time:"15分",
+ ing:[["乾燥蕎麦","200g"],["めんつゆ","適量"],["ねぎ・わさび・海苔","お好みで"]],
+ steps:["蕎麦を表示時間通りに茹でる。","冷水でしっかりもみ洗いし、ぬめりを取る。","ざるに盛り、刻み海苔をのせる。","めんつゆに薬味を添えてつけて食べる。"]},
+
+{id:"udon", emoji:"🍲", jp:"肉うどん", en:"Niku Udon", cap:"もちもち麺と甘辛い肉だしの相性は裏切らない。", tags:["#もちもち","#温まる"], time:"15分",
+ ing:[["冷凍うどん","2玉"],["牛肉こま切れ","150g"],["めんつゆ","大さじ4"],["水","500ml"],["玉ねぎ","1/2個"],["ねぎ","お好みで"]],
+ steps:["鍋にめんつゆと水を入れて温め、玉ねぎと牛肉を煮る。","冷凍うどんを表示通りに解凍・加熱する。","どんぶりにうどんを入れ、汁と具をかける。","ねぎを散らす。"]},
+
+{id:"karaage", emoji:"🍗", jp:"唐揚げ定食", en:"Karaage Set", cap:"外はカリッと、下味しっかりのご飯泥棒。", tags:["#揚げ物","#定食"], time:"25分",
+ ing:[["鶏もも肉","300g"],["醤油・酒","各大さじ1"],["おろしにんにく・おろししょうが","各小さじ1"],["片栗粉","適量"],["揚げ油","適量"],["ごはん・キャベツ","お好みで"]],
+ steps:["鶏肉を一口大に切り、調味料に15分ほど漬け込む。","汁気を切り、片栗粉をまぶす。","170℃の油できつね色になるまで揚げる。","ごはん・キャベツと一緒に盛り付ける。"]},
+
+{id:"omurice", emoji:"🍳", jp:"デミオムライス", en:"Demi-glace Omurice", cap:"とろとろ卵にナイフを入れる、あの瞬間のための料理。", tags:["#とろとろ","#洋食"], time:"25分",
+ ing:[["ごはん","300g"],["鶏肉・玉ねぎ","各適量"],["ケチャップ","大さじ3"],["卵","4個"],["デミグラスソース缶","1缶"]],
+ steps:["鶏肉・玉ねぎを炒め、ごはんとケチャップを加えてチキンライスを作る。","チキンライスを楕円形に成形して皿に盛る。","卵を溶き、半熟状に焼いてチキンライスにのせる。","デミグラスソースを温めてかける。"]},
+
+{id:"motsunabe", emoji:"🍲", jp:"もつ鍋", en:"Motsunabe Hot Pot", cap:"にんにく香るスープでコラーゲンチャージ。", tags:["#鍋","#〆はちゃんぽん麺"], time:"30分",
+ ing:[["牛もつ（下処理済み）","300g"],["キャベツ","1/4個"],["にら","1束"],["もやし","1袋"],["にんにく","2片"],["鍋スープ（醤油or味噌ベース）","1袋"]],
+ steps:["キャベツはざく切り、にらは食べやすい長さに切る。","鍋にスープを入れて煮立て、もつを加えて煮る。","キャベツ・にんにくを加えてさらに煮る。","仕上げににら・もやしを加えてさっと煮る。"]},
+
+{id:"mapo", emoji:"🌶", jp:"麻婆豆腐", en:"Mapo Tofu", cap:"痺れと辛さが後を引く、白飯が止まらない一皿。", tags:["#痺れ辛","#中華"], time:"20分",
+ ing:[["豆腐","1丁"],["豚ひき肉","150g"],["豆板醤","小さじ1"],["甜麺醤","大さじ1"],["にんにく・しょうが","各1片"],["鶏ガラスープ","150ml"],["片栗粉（水溶き）","大さじ1"],["ラー油","お好みで"]],
+ steps:["豆腐は角切りにし、湯通ししておく。","フライパンでにんにく・しょうが・ひき肉を炒める。","豆板醤・甜麺醤・鶏ガラスープを加えて煮立たせる。","豆腐を加えて軽く煮て、水溶き片栗粉でとろみをつける。"]},
+
+{id:"bibimbap", emoji:"🥗", jp:"ビビンバ", en:"Bibimbap", cap:"混ぜる瞬間が一番テンション上がる韓国の定番。", tags:["#韓国料理","#混ぜご飯"], time:"25分",
+ ing:[["ごはん","2膳"],["牛こま切れ肉","150g"],["ほうれん草","100g（約1/2束）"],["もやし","100g（約1/2袋）"],["にんじん","50g（約1/3本）"],["コチュジャン","大さじ2"],["ごま油","大さじ1と各ナムル用に小さじ1ずつ"],["塩","各ナムルに少々"],["卵","2個"],["醤油・砂糖・おろしにんにく（牛肉用）","各小さじ1"]],
+ steps:["ほうれん草は熱湯でさっと茹でて水にとり、水気を絞って3cm幅に切る。もやしはひげ根を取り、切らずにそのまま熱湯で1〜2分茹でる。にんじんは長さ4cmほどのせん切りにする。","にんじんをごま油小さじ1で軽く炒め、しんなりしたら火を止める。ほうれん草・もやし・にんじんをそれぞれごま油小さじ1と塩少々で和えてナムルにする。","牛肉を醤油・砂糖・おろしにんにくで炒める。","卵を目玉焼きにする。","ごはんの上に牛肉・3種のナムル・卵を彩りよくのせ、コチュジャンを添える。"]},
+
+{id:"tacos", emoji:"🌮", jp:"タコス盛り合わせ", en:"Taco Plate", cap:"手づかみで気分はちょっと海外気分。", tags:["#手づかみ","#気分転換"], time:"20分",
+ ing:[["トルティーヤ","6枚"],["合いびき肉","200g"],["チリパウダー・クミン","各小さじ1"],["レタス・トマト・チーズ","各適量"],["サルサソース","お好みで"]],
+ steps:["ひき肉をチリパウダー・クミンで炒める。","レタスは千切り、トマトは角切りにする。","トルティーヤを軽く温める。","具材をのせて包み、サルサをかける。"]},
+
+{id:"pizza", emoji:"🍕", jp:"マルゲリータピザ", en:"Margherita Pizza", cap:"シンプルだからこそ生地とチーズの実力が分かる。", tags:["#シンプル","#チーズ"], time:"15分",
+ ing:[["ピザ生地（市販）","1枚"],["トマトソース","大さじ3"],["モッツァレラチーズ","100g"],["バジル","適量"],["オリーブオイル","少々"]],
+ steps:["生地にトマトソースを塗る。","モッツァレラチーズをちぎってのせる。","220℃に予熱したオーブンで8〜10分焼く。","焼き上がりにバジルとオリーブオイルをかける。"]},
+
+{id:"steak", emoji:"🥩", jp:"厚切りステーキ", en:"Thick-cut Steak", cap:"給料日後や記念日に。焼き加減はミディアムレア。", tags:["#特別な日","#肉"], time:"15分",
+ ing:[["牛ステーキ肉","2枚（各200g前後）"],["塩こしょう","適量"],["にんにく","1片"],["バター","10g"],["醤油","小さじ1"]],
+ steps:["肉を常温に戻し、塩こしょうをする。","フライパンでにんにくを香り出し、肉を強火で両面焼く。","焼き色がついたら弱火にしてお好みの焼き加減に仕上げる。","バターと醤油を絡めて仕上げる。"]},
+
+{id:"kaisendon", emoji:"🍚", jp:"海鮮丼", en:"Kaisendon", cap:"新鮮なネタを敷き詰めた、贅沢どんぶり。", tags:["#海鮮","#贅沢丼"], time:"15分",
+ ing:[["刺身盛り合わせ","1パック"],["ごはん","2膳"],["しょうゆ","適量"],["わさび","お好みで"],["卵黄・刻みのり","お好みで"]],
+ steps:["ごはんをどんぶりに盛る。","刺身を食べやすく並べる。","わさびと刻みのりを添える。","しょうゆをかけて食べる。"]},
+
+{id:"miso", emoji:"🍜", jp:"味噌ラーメン", en:"Miso Ramen", cap:"コクのある味噌スープにバターを一片、が至高。", tags:["#味噌","#バター追加"], time:"20分",
+ ing:[["豚ひき肉","100g"],["もやし・キャベツ","各適量"],["味噌","大さじ3"],["鶏ガラスープの素","大さじ1"],["にんにく・しょうが","各1片"],["バター","10g"],["中華麺","2玉"]],
+ steps:["フライパンでにんにく・しょうが・ひき肉を炒める。","もやし・キャベツを加えてさっと炒める。","水と鶏ガラスープの素、味噌を溶いて加える。","茹でた麺にスープをかけ、バターをのせる。"]},
+
+{id:"shogayaki", emoji:"🍱", jp:"生姜焼き定食", en:"Ginger Pork Set", cap:"甘辛いタレが絡んだ豚肉に、白飯が進む安定の一皿。", tags:["#定食","#安定感"], time:"15分",
+ ing:[["豚ロース薄切り肉","250g"],["しょうが（すりおろし）","大さじ1"],["醤油・みりん・酒","各大さじ2"],["砂糖","小さじ1"],["玉ねぎ","1/2個"],["キャベツ（千切り）・ごはん","お好みで"]],
+ steps:["調味料としょうがを混ぜてタレを作る。","玉ねぎを薄切りにして炒め、豚肉を加えて焼く。","色が変わったらタレを加えて絡める。","キャベフの千切りとごはんを添えて盛り付ける。"]},
+
+{id:"dakgalbi", emoji:"🥘", jp:"チーズタッカルビ", en:"Cheese Dakgalbi", cap:"伸びるチーズと甘辛い鶏肉、シェアして食べたい。", tags:["#韓国料理","#シェア飯"], time:"30分",
+ ing:[["鶏もも肉","300g"],["コチュジャン・醤油・砂糖・おろしにんにく","各適量"],["キャベツ・玉ねぎ・にんじん","各適量"],["餅","お好みで"],["ピザ用チーズ","150g"]],
+ steps:["鶏肉をコチュジャンベースのタレに15分漬け込む。","フライパンに野菜と鶏肉を敷き詰めて蓋をし、火が通るまで蒸し焼きにする。","全体を混ぜながら炒め、餅を加える。","仕上げにチーズをのせて溶かす。"]},
+
+{id:"onepan-hamburg", emoji:"🍖", jp:"ワンパンハンバーグ", en:"One-Pan Hamburg Steak", cap:"ボウル不要。フライパンの中でこねて、そのまま焼く。洗い物が少ない時短ハック。", tags:["#時短","#洗い物少ない","#創作"], time:"20分",
+ ing:[["合いびき肉","250g"],["食パン（またはパン粉）","1枚"],["牛乳","大さじ2"],["卵","1個"],["玉ねぎ（みじん切り）","1/4個"],["塩こしょう","少々"],["ケチャップ・中濃ソース","各大さじ2"],["みりん","大さじ1"]],
+ steps:["フライパンに直接ひき肉・ちぎった食パン・牛乳・卵・玉ねぎ・塩こしょうを入れ、ボウルを使わずよく練り混ぜる。","4等分にして小判形に成形し、そのままフライパンに並べる。","中火で焼き色をつけ、裏返して蓋をし中まで火を通す。","一度取り出し、残った肉汁にケチャップ・ソース・みりんを加えて煮詰め、ハンバーグにかける。"]},
+
+{id:"renji-butashabu", emoji:"🥬", jp:"レンジだけ豚しゃぶサラダ", en:"Microwave Pork Shabu Salad", cap:"鍋を使わずレンジだけ。洗い物最小限なのにさっぱりヘルシー。", tags:["#レンジ調理","#ヘルシー","#創作"], time:"15分",
+ ing:[["豚肉（しゃぶしゃぶ用）","200g"],["酒","大さじ1"],["レタス・きゅうり・トマトなど","お好みで"],["ポン酢","大さじ3"],["ごま油","小さじ1"],["すりごま・ねぎ","お好みで"]],
+ steps:["耐熱皿に豚肉を広げ、酒を回しかけてふんわりラップし600Wで3〜4分加熱する（様子を見て追加）。","冷水にとらず粗熱を取り、余分な水気を拭く。","野菜を切って器に敷き、豚肉をのせる。","ポン酢・ごま油・すりごま・ねぎを混ぜたタレをかける。"]},
+
+{id:"takikomi", emoji:"🍙", jp:"きのこの炊き込みご飯", en:"Mushroom Takikomi Gohan", cap:"炊飯器に入れてスイッチを押すだけ。あとは待つだけの放置系。", tags:["#放置系","#炊飯器","#創作"], time:"50分（炊飯時間込み）",
+ ing:[["米","2合"],["舞茸・しめじなどきのこ","150g"],["油揚げ","1枚"],["にんじん","1/3本"],["めんつゆ（2倍濃縮）","大さじ4"],["酒","大さじ1"]],
+ steps:["米を研いで炊飯釜に入れ、めんつゆ・酒を加えて2合の目盛りまで水を注ぐ。","きのこ・油揚げ・にんじんを食べやすく切り、米の上にのせる（混ぜない）。","通常モードで炊飯する。","炊き上がったら底から優しく混ぜて蒸らす。"]},
+
+{id:"renji-chawanmushi", emoji:"🥚", jp:"レンジ茶碗蒸し", en:"Microwave Chawanmushi", cap:"蒸し器いらず。レンジで作る、つるんと優しい一品。", tags:["#レンジ調理","#和食","#創作"], time:"15分",
+ ing:[["卵","2個"],["だし汁","300ml"],["醤油・みりん","各小さじ1"],["塩","少々"],["鶏肉・かまぼこ・しいたけなど","お好みで"]],
+ steps:["卵をよく溶き、だし汁・醤油・みりん・塩と混ぜてこす。","具材を耐熱カップに入れ、卵液を注ぐ。","ラップをふんわりかけ、600Wで2分加熱し、様子を見ながら30秒ずつ追加加熱する。","竹串を刺して澄んだ汁が出たら完成。"]},
+
+{id:"saba-pasta", emoji:"🐟", jp:"サバ缶パスタ", en:"Canned Mackerel Pasta", cap:"缶詰1つで本格的な旨みに。買い出しに行きたくない日の救世主。", tags:["#缶詰活用","#時短","#創作"], time:"15分",
+ ing:[["パスタ","200g"],["サバ缶（水煮）","1缶"],["にんにく","1片"],["醤油","小さじ2"],["オリーブオイル","大さじ1"],["青ねぎ・七味","お好みで"]],
+ steps:["パスタを茹で始める。","フライパンでにんにくを香り出し、サバ缶を汁ごと加えてほぐしながら温める。","醤油で味を調える。","茹で上がったパスタと和え、ねぎ・七味をふる。"]},
+
+{id:"tuna-chahan", emoji:"🍳", jp:"ツナ缶チャーハン", en:"Canned Tuna Fried Rice", cap:"冷蔵庫にある缶詰とごはんだけ。10分で完成する即席パラパラ飯。", tags:["#缶詰活用","#爆速","#創作"], time:"10分",
+ ing:[["ごはん","300g"],["ツナ缶","1缶"],["卵","1個"],["ねぎ","適量"],["醤油","小さじ2"],["塩こしょう・ごま油","各少々"]],
+ steps:["フライパンにごま油を熱し、溶き卵を入れてすぐごはんを加えパラパラになるまで炒める。","油を切ったツナを加えて炒め合わせる。","醤油・塩こしょうで味を調える。","ねぎを散らして仕上げる。"]},
+
+{id:"hoil-shake", emoji:"🎣", jp:"鮭ときのこのホイル焼き", en:"Foil-Baked Salmon & Mushrooms", cap:"包んで焼くだけ。洗い物ゼロで魚料理が完成する放置系レシピ。", tags:["#放置系","#洗い物ゼロ","#創作"], time:"20分",
+ ing:[["生鮭","2切れ"],["しめじ・エリンギなど","適量"],["玉ねぎ","1/4個"],["バター","10g"],["醤油","小さじ2"],["酒","小さじ1"]],
+ steps:["アルミホイルに薄切りにした玉ねぎを敷き、鮭をのせる。","きのこをのせ、酒をふってバターをのせる。","ホイルを包み、フライパンかグリルで10〜15分蒸し焼きにする。","仕上げに醤油をかける。"]},
+
+{id:"renji-mushidori", emoji:"🐔", jp:"レンジ蒸し鶏の棒々鶏風サラダ", en:"Microwave Steamed Chicken Salad", cap:"パサつきがちな鶏むね肉も、レンジと余熱でしっとり仕上がる。", tags:["#レンジ調理","#高たんぱく","#創作"], time:"15分",
+ ing:[["鶏むね肉","1枚"],["酒","大さじ1"],["塩","少々"],["きゅうり・トマトなど","お好みで"],["練りごま・醤油・砂糖・酢・ラー油","各適量（タレ）"]],
+ steps:["鶏肉に酒・塩をふり、ラップに包んで600Wで3〜4分加熱する。","そのまま予熱で5分ほど放置し、余熱で中まで火を通す。","粗熱が取れたら手で食べやすく割く。","野菜を敷いた皿にのせ、タレの材料を混ぜてかける。"]},
+
+{id:"mugen-piman", emoji:"🫑", jp:"無限ピーマンのっけごはん", en:"Endless Peppers Rice Bowl", cap:"レンジで2分、箸が止まらなくなる無限系おかずをごはんにのせて。", tags:["#レンジ調理","#時短","#創作"], time:"10分",
+ ing:[["ピーマン","4個"],["ツナ缶","1缶"],["ごま油","小さじ1"],["醤油","小さじ1"],["白ごま","適量"],["ごはん","2膳"]],
+ steps:["ピーマンを細切りにする。","耐熱ボウルにピーマン・油を切ったツナ・調味料を入れて混ぜる。","ラップをして600Wで2分加熱する。","ごはんにのせ、白ごまを散らす。"]},
+
+{id:"ahijo", emoji:"🧄", jp:"えびとマッシュルームのアヒージョ", en:"Shrimp & Mushroom Ajillo", cap:"スキレット1つでバルの味。オリーブオイルごとパンにひたして食べたい。", tags:["#おつまみ","#スキレット","#創作"], time:"15分",
+ ing:[["むきえび","10尾"],["マッシュルーム・ミニトマトなど","お好みで"],["にんにく","2片"],["オリーブオイル","150ml"],["塩・鷹の爪","少々"],["バゲット","お好みで"]],
+ steps:["スキレットにオリーブオイル・薄切りにんにく・鷹の爪を入れ弱火で香りを出す。","えび・マッシュルームなどの具材を加える。","塩で味を調えながら5〜7分煮る。","熱いうちにバゲットを添えて食べる。"]},
+
+{id:"nonfry-karaage", emoji:"🍗", jp:"オーブンでノンフライ唐揚げ", en:"Oven-Baked Karaage", cap:"油で揚げずにオーブンでカリッと。後片付けが楽で、油の処理もいらない。", tags:["#揚げない","#ヘルシー","#創作"], time:"25分",
+ ing:[["鶏もも肉","300g"],["おろし生姜","1かけ"],["おろしにんにく","小さじ1"],["醤油・酒","各大さじ1"],["片栗粉","大さじ2"],["オリーブオイル（仕上げ用）","少々"]],
+ steps:["鶏肉を一口大に切り、生姜・にんにく・醤油・酒と混ぜて10分ほど漬け込む。","汁気を軽く切り、片栗粉をまんべんなくまぶす。","クッキングシートを敷いた天板に並べ、表面にオリーブオイルを薄く塗る。","200℃に予熱したオーブンで15〜20分、途中で一度ひっくり返しながら焼く。"]},
+
+{id:"nonfry-katsu", emoji:"🥩", jp:"揚げないカツレツ（揚げ焼き）", en:"Pan-Fried Katsu", cap:"大量の油を使わず、少なめの油で揚げ焼きにするだけで満足感は十分。", tags:["#揚げない","#少ない油","#創作"], time:"20分",
+ ing:[["豚ロース薄切り肉","4枚"],["塩こしょう","少々"],["小麦粉・卵・パン粉","各適量"],["オリーブオイル","大さじ3"],["とんかつソース","適量"]],
+ steps:["豚肉に塩こしょうをし、小麦粉→卵→パン粉の順に衣をつける。","フライパンに油を大さじ3ほど入れて中火で熱する。","衣をつけた肉を並べ、両面をこんがりと揚げ焼きにする。","油を切って盛り付け、ソースをかける。"]},
+
+{id:"nonfry-tempura", emoji:"🍆", jp:"揚げない天ぷら風グリル野菜", en:"Grilled Vegetable Tempura Style", cap:"油を使わずグリルやトースターで。野菜の甘みがぎゅっと引き立つ。", tags:["#揚げない","#野菜たっぷり","#創作"], time:"15分",
+ ing:[["なす・かぼちゃ・ピーマンなど","お好みで"],["オリーブオイル","大さじ1"],["塩","少々"],["天つゆ（お好みで）","適量"]],
+ steps:["野菜を食べやすい大きさに切る。","オリーブオイルを薄くまぶす。","魚焼きグリルまたはオーブントースターで焼き色がつくまで焼く。","塩や天つゆをつけて食べる。"]},
+
+{id:"nonfry-ebi", emoji:"🦐", jp:"揚げないエビフライ（トースター焼き）", en:"Oven-Toaster Fried Shrimp", cap:"衣はサクッと、油はほんの少し。トースターにおまかせの時短フライ。", tags:["#揚げない","#時短","#創作"], time:"20分",
+ ing:[["えび","10尾"],["塩こしょう","少々"],["小麦粉・卵・パン粉","各適量"],["オリーブオイル","少々"],["タルタルソース","お好みで"]],
+ steps:["えびの殻をむき、背わたを取って塩こしょうする。","小麦粉→卵→パン粉の順に衣をつける。","アルミホイルにのせてオリーブオイルを薄くかける。","トースターで焼き色がつくまで10分ほど焼く。"]},
+
+{id:"onepot-tomatopasta", emoji:"🍅", jp:"鍋ひとつトマトパスタ", en:"One-Pot Tomato Pasta", cap:"パスタを茹でる鍋と煮る鍋を分けない、洗い物が少ない時短パスタ。", tags:["#鍋ひとつ","#時短","#創作"], time:"15分",
+ ing:[["パスタ","200g"],["カットトマト缶","1缶"],["にんにく","1片"],["オリーブオイル","大さじ1"],["水","400ml"],["塩","小さじ1"]],
+ steps:["鍋にオリーブオイルとにんにくを入れて弱火で香りを出す。","トマト缶・水・塩を加えて煮立たせる。","乾麺のパスタを折らずに加え、表示時間より1分長めに煮る（時々混ぜる）。","汁気が軽く残る程度で火を止め、余熱でなじませる。"]},
+
+{id:"onepot-kimchi", emoji:"🍲", jp:"キムチ鍋", en:"Kimchi Hot Pot", cap:"鍋ひとつで完結。〆のご飯やラーメンまで含めてお楽しみを。", tags:["#鍋ひとつ","#ピリ辛","#創作"], time:"20分",
+ ing:[["豚バラ肉","200g"],["白菜キムチ","200g"],["豆腐","1丁"],["にら・もやし","各適量"],["水","500ml"],["味噌・コチュジャン","各大さじ1"]],
+ steps:["鍋に豚肉とキムチを入れて軽く炒める。","水を加えて煮立たせ、味噌・コチュジャンを溶き入れる。","豆腐と野菜を加えて煮る。","お好みでご飯やラーメンを〆に入れる。"]},
+
+{id:"onepot-tonyu", emoji:"🥛", jp:"豆乳担々風ひとり鍋", en:"Soy Milk Tantan Hot Pot", cap:"ひとり分でも作りやすい、クリーミーでピリ辛な鍋ひとつご褒美飯。", tags:["#鍋ひとつ","#ひとり鍋","#創作"], time:"20分",
+ ing:[["豚ひき肉","100g"],["豆乳","400ml"],["味噌","大さじ1"],["豆板醤","小さじ1"],["白菜・にらなど野菜","適量"],["ラー油・ごま","お好みで"]],
+ steps:["鍋でひき肉を炒め、豆板醤を加えて香りを出す。","豆乳と味噌を加え、煮立たせないよう弱火で温める。","野菜を加えて煮る。","仕上げにラー油とごまをかける。"]},
+
+{id:"onepot-chanchan", emoji:"🐟", jp:"鮭のちゃんちゃん焼き鍋", en:"Salmon Chanchan-yaki Pot", cap:"フライパンひとつで北海道の郷土料理。味噌バターの香りが食欲をそそる。", tags:["#鍋ひとつ","#和食","#創作"], time:"20分",
+ ing:[["生鮭","2切れ"],["キャベツ・玉ねぎ・もやしなど","適量"],["味噌","大さじ2"],["みりん","大さじ1"],["バター","10g"]],
+ steps:["フライパンに野菜を敷き、鮭をのせる。","味噌とみりんを混ぜて鮭の上に塗る。","蓋をして中火で10分ほど蒸し焼きにする。","仕上げにバターをのせて溶かす。"]},
+
+{id:"ninjin-shirishiri", emoji:"🥕", jp:"にんじんしりしり", en:"Ninjin Shirishiri", cap:"沖縄の定番おかず。せん切りにんじんとツナ、卵だけの優しい甘さ。", tags:["#にんじん","#沖縄料理","#創作"], time:"15分",
+ ing:[["にんじん","1本（150g）"],["ツナ缶","1缶"],["卵","1個"],["醤油","小さじ2"],["ごま油","小さじ1"],["塩","少々"]],
+ steps:["にんじんをスライサーやピーラーでせん切りにする。","フライパンにごま油を熱し、にんじんがしんなりするまで炒める。","油を切ったツナを加えて炒め合わせる。","溶き卵を回し入れ、醤油・塩で味を調えながら炒り卵状に絡める。"]},
+
+{id:"kinpira-ninjin", emoji:"🥕", jp:"豚こまとにんじんの甘辛きんぴら", en:"Pork & Carrot Kinpira", cap:"にんじんをたっぷり使った、ご飯が進む甘辛い炒め煮。", tags:["#にんじん","#常備菜","#創作"], time:"15分",
+ ing:[["豚こま肉","150g"],["にんじん","1本（150g）"],["ごぼう（あれば）","1/2本"],["ごま油","小さじ1"],["醤油・みりん・砂糖","各大さじ2"],["白ごま","適量"]],
+ steps:["にんじん・ごぼうを細切りにする（ごぼうは水にさらしてアク抜きする）。","フライパンにごま油を熱し、豚肉を炒めて色が変わったら野菜を加える。","全体がしんなりするまで炒める。","醤油・みりん・砂糖を加え、汁気がなくなるまで炒め煮にして白ごまをふる。"]},
+
+{id:"carrot-potage", emoji:"🥕", jp:"にんじんの豆乳ポタージュ", en:"Carrot & Soy Milk Potage", cap:"にんじん2本分の甘みを丸ごと味わう、優しい味のスープごはん。", tags:["#にんじん","#スープ","#創作"], time:"20分",
+ ing:[["にんじん","2本（300g）"],["玉ねぎ","1/4個"],["バター","10g"],["コンソメ","小さじ1"],["水","200ml"],["豆乳","200ml"],["塩こしょう","少々"]],
+ steps:["にんじん・玉ねぎを薄切りにする。","鍋にバターを熱し、玉ねぎ・にんじんをしんなりするまで炒める。","水とコンソメを加え、にんじんが柔らかくなるまで10分ほど煮る。","ブレンダーやミキサーで攪拌し、豆乳を加えて温め、塩こしょうで味を調える。"]},
+
+{id:"chicken-ninjin-oyster", emoji:"🥕", jp:"鶏むねとにんじんのオイスター炒め", en:"Chicken & Carrot Oyster Stir-fry", cap:"パサつきがちな鶏むねも、片栗粉をまぶせばしっとり仕上がる。", tags:["#にんじん","#高たんぱく","#創作"], time:"15分",
+ ing:[["鶏むね肉","1枚"],["にんじん","1本（150g）"],["ピーマン","1個"],["酒・片栗粉（下味用）","各小さじ1"],["オイスターソース","大さじ1.5"],["醤油","小さじ1"],["ごま油","小さじ1"]],
+ steps:["鶏肉をそぎ切りにし、酒と片栗粉をもみ込んでおく。","にんじん・ピーマンを細切りにする。","フライパンにごま油を熱し、鶏肉を炒めて色が変わったら野菜を加える。","オイスターソースと醤油を加えて全体に絡める。"]},
+
+{id:"carrot-rapee", emoji:"🥕", jp:"キャロットラペ", en:"Carrot Rapée", cap:"作り置きにも便利な、酸味と甘みのバランスがいいフレンチ副菜。", tags:["#にんじん","#作り置き","#創作"], time:"10分",
+ ing:[["にんじん","1本（150g）"],["レーズン（あれば）","大さじ1"],["オリーブオイル","大さじ1"],["酢","大さじ1"],["塩・こしょう・砂糖","各少々"]],
+ steps:["にんじんをスライサーやピーラーでせん切りにする。","塩をふって5分ほどおき、しんなりしたら水気を軽く絞る。","オリーブオイル・酢・砂糖・こしょうを混ぜてドレッシングを作る。","にんじんとレーズンを加えて和え、味をなじませる。"]}
+];
+
+const card = document.getElementById('card');
+const btn = document.getElementById('gachaBtn');
+const hint = document.getElementById('hint');
+const savedToggle = document.getElementById('savedToggle');
+const savedPanel = document.getElementById('savedPanel');
+const savedList = document.getElementById('savedList');
+
+let current = null;
+let filterKeywords = [];
+
+const STORAGE_KEY = 'gohanGachaSaved';
+
+function loadSavedMap(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const obj = raw ? JSON.parse(raw) : {};
+    return new Map(Object.entries(obj));
+  }catch(e){
+    console.error('failed to read localStorage', e);
+    return new Map();
+  }
+}
+
+function persistSavedMap(map){
+  try{
+    const obj = Object.fromEntries(map);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+    return true;
+  }catch(e){
+    console.error('failed to write localStorage', e);
+    return false;
+  }
+}
+
+const memoryFallback = loadSavedMap(); // id -> item, backed by localStorage for real persistence
+
+const filterInput = document.getElementById('filterInput');
+const filterApply = document.getElementById('filterApply');
+const filterClear = document.getElementById('filterClear');
+const filterStatus = document.getElementById('filterStatus');
+
+function getPool(){
+  if(filterKeywords.length === 0) return MENU;
+  const matched = MENU.filter(item => item.ing.some(([name]) =>
+    filterKeywords.some(k => name.toLowerCase().includes(k.toLowerCase()))
+  ));
+  return matched.length > 0 ? matched : null; // null = no match
+}
+
+function updateFilterStatus(){
+  if(filterKeywords.length === 0){
+    filterStatus.textContent = '';
+    return;
+  }
+  const pool = getPool();
+  if(pool === null){
+    filterStatus.textContent = `⚠️「${filterKeywords.join('・')}」を使うメニューが見つからなかった。条件を減らすか別の食材で試してみて。`;
+  }else{
+    filterStatus.textContent = `🎯 「${filterKeywords.join('・')}」を含む ${pool.length}品に絞り込み中`;
+  }
+}
+
+filterApply.addEventListener('click', () => {
+  const raw = filterInput.value.trim();
+  filterKeywords = raw ? raw.split(/[,、\s]+/).filter(Boolean) : [];
+  updateFilterStatus();
+});
+filterInput.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') filterApply.click();
+});
+filterClear.addEventListener('click', () => {
+  filterKeywords = [];
+  filterInput.value = '';
+  updateFilterStatus();
+});
+
+function renderCard(item, withDetails){
+  const ingHtml = item.ing.map(([name, amt]) => `<li>${name}<span class="amt">${amt}</span></li>`).join('');
+  const stepHtml = item.steps.map(s => `<li>${s}</li>`).join('');
+  card.innerHTML = `
+    <div class="top-row">
+      <div class="tag">TODAY'S PICK</div>
+      <div class="time-badge">⏱ ${item.time}</div>
+    </div>
+    <div class="head">
+      <div class="emoji">${item.emoji}</div>
+      <div class="name-jp">${item.jp}</div>
+      <div class="name-en">${item.en}</div>
+      <div class="caption">${item.cap}</div>
+      <div class="hashtags">${item.tags.map(t => `<span>${t}</span>`).join('')}</div>
+    </div>
+    <hr class="divider">
+    <div class="section-title">材料（2人分目安）</div>
+    <div class="servings-note">分量はお好みで調整してね</div>
+    <ul class="ingredients">${ingHtml}</ul>
+    <div class="section-title" style="margin-top:14px;">作り方</div>
+    <ol class="steps">${stepHtml}</ol>
+    <div class="actions">
+      <button class="mini-btn" id="saveBtn">♡ 保存する</button>
+    </div>
+    <div id="saveError" style="color:#c0392b; font-size:11.5px; margin-top:6px; display:none;"></div>
+    <div class="ai-box">
+      <div class="section-title">🤖 分からないことをAIに聞く</div>
+      <div class="ai-chips">
+        <span class="ai-chip" data-q="この材料で分からない単語があれば説明して">用語を説明して</span>
+        <span class="ai-chip" data-q="家にありそうな代わりの材料を教えて">代用できる材料は？</span>
+        <span class="ai-chip" data-q="辛さや味を控えめにするならどう変える？">味を調整するには？</span>
+      </div>
+      <div class="ai-row">
+        <input type="text" id="aiInput" placeholder="例：甜麺醤って何？味噌で代用できる？">
+        <button id="aiSend">聞く</button>
+      </div>
+      <div class="ai-loading" id="aiLoading">考え中…</div>
+      <div class="ai-answer" id="aiAnswer"></div>
+    </div>
+  `;
+  document.getElementById('saveBtn').addEventListener('click', () => saveRecipe(item));
+  checkSaved(item.id);
+
+  const aiInput = document.getElementById('aiInput');
+  const aiSend = document.getElementById('aiSend');
+  document.querySelectorAll('.ai-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      aiInput.value = chip.dataset.q;
+      askAI(item, chip.dataset.q);
+    });
+  });
+  aiSend.addEventListener('click', () => {
+    const q = aiInput.value.trim();
+    if(q) askAI(item, q);
+  });
+  aiInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){
+      const q = aiInput.value.trim();
+      if(q) askAI(item, q);
+    }
+  });
+}
+
+async function askAI(item, question){
+  const loading = document.getElementById('aiLoading');
+  const answerBox = document.getElementById('aiAnswer');
+  const sendBtn = document.getElementById('aiSend');
+  if(!loading || !answerBox) return;
+
+  loading.classList.add('show');
+  answerBox.classList.remove('show');
+  sendBtn.disabled = true;
+
+  const recipeContext = `料理名: ${item.jp}（${item.en}）
+材料: ${item.ing.map(([n,a]) => `${n} ${a}`).join('、')}
+作り方: ${item.steps.join(' / ')}`;
+
+  try{
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [
+          {
+            role: "user",
+            content: `あなたは料理のアシスタントです。次のレシピについてのユーザーの質問に、日本語で簡潔に（3〜5文程度で）答えてください。専門用語はやさしく言い換え、代用食材の提案では家庭にありがちなもの、または近所のスーパーで買えるものを優先してください。\n\n【レシピ情報】\n${recipeContext}\n\n【質問】\n${question}`
+          }
+        ]
+      })
+    });
+    const data = await response.json();
+    const text = (data.content || [])
+      .filter(b => b.type === "text")
+      .map(b => b.text)
+      .join("\n")
+      .trim();
+    answerBox.textContent = text || "うまく答えられなかった…もう一度質問してみて。";
+  }catch(e){
+    answerBox.textContent = "エラーが発生したよ。もう一度試してみてね。";
+    console.error("AI request failed", e);
+  }finally{
+    loading.classList.remove('show');
+    answerBox.classList.add('show');
+    sendBtn.disabled = false;
+  }
+}
+
+function saveRecipe(item){
+  const btn2 = document.getElementById('saveBtn');
+  memoryFallback.set(item.id, item);
+  persistSavedMap(memoryFallback);
+  if(btn2){ btn2.textContent = '♥ 保存済み'; btn2.classList.add('saved'); }
+  refreshSavedList();
+}
+
+function checkSaved(id){
+  const btn2 = document.getElementById('saveBtn');
+  if(!btn2) return;
+  if(memoryFallback.has(id)){
+    btn2.textContent = '♥ 保存済み'; btn2.classList.add('saved');
+  }
+}
+
+function refreshSavedList(){
+  if(memoryFallback.size === 0){
+    savedList.innerHTML = '<div class="empty-note">まだ保存したレシピはないよ</div>';
+    return;
+  }
+
+  let html = '';
+  memoryFallback.forEach((item) => {
+    html += `<div class="saved-item">
+      <span class="label" data-id="${item.id}">${item.emoji} ${item.jp}</span>
+      <button data-del="${item.id}">削除</button>
+    </div>`;
+  });
+  savedList.innerHTML = html;
+
+  savedList.querySelectorAll('.label').forEach(el => {
+    el.addEventListener('click', () => {
+      const item = MENU.find(m => m.id === el.dataset.id);
+      if(item){ renderCard(item, true); window.scrollTo({top:0, behavior:'smooth'}); }
+    });
+  });
+  savedList.querySelectorAll('button[data-del]').forEach(el => {
+    el.addEventListener('click', () => {
+      memoryFallback.delete(el.dataset.del);
+      persistSavedMap(memoryFallback);
+      refreshSavedList();
+      if(current && current.id === el.dataset.del) checkSaved(current.id);
+    });
+  });
+}
+
+// ---- Export / Import (copy-paste code) ----
+const exportBtn = document.getElementById('exportBtn');
+const copyBtn = document.getElementById('copyBtn');
+const exportArea = document.getElementById('exportArea');
+const importInput = document.getElementById('importInput');
+const importBtn = document.getElementById('importBtn');
+const ioStatus = document.getElementById('ioStatus');
+
+exportBtn.addEventListener('click', () => {
+  const ids = Array.from(memoryFallback.keys());
+  if(ids.length === 0){
+    ioStatus.textContent = '保存済みのレシピがまだないよ。先にレシピを保存してみて。';
+    return;
+  }
+  const code = btoa(encodeURIComponent(JSON.stringify(ids)));
+  exportArea.value = code;
+  exportArea.style.display = 'block';
+  copyBtn.style.display = 'inline-block';
+  exportArea.select();
+  ioStatus.textContent = `${ids.length}件のコードを書き出したよ。コピーしてメモしておいてね。`;
+});
+
+copyBtn.addEventListener('click', async () => {
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(exportArea.value);
+    }else{
+      exportArea.select();
+      document.execCommand('copy');
+    }
+    ioStatus.textContent = 'コピーしたよ！メモアプリなどに貼り付けて保存しておいて。';
+  }catch(e){
+    exportArea.select();
+    ioStatus.textContent = 'コピーがうまくいかなかったので、選択された文字を手動でコピーしてね。';
+  }
+});
+
+importBtn.addEventListener('click', () => {
+  const raw = importInput.value.trim();
+  if(!raw){ ioStatus.textContent = 'コードを貼り付けてから読み込んでね。'; return; }
+  try{
+    const ids = JSON.parse(decodeURIComponent(atob(raw)));
+    if(!Array.isArray(ids)) throw new Error('invalid format');
+    let restored = 0;
+    ids.forEach(id => {
+      const item = MENU.find(m => m.id === id);
+      if(item){ memoryFallback.set(id, item); restored++; }
+    });
+    persistSavedMap(memoryFallback);
+    refreshSavedList();
+    if(current) checkSaved(current.id);
+    ioStatus.textContent = `${restored}件のレシピを復元したよ。`;
+    importInput.value = '';
+  }catch(e){
+    ioStatus.textContent = 'コードが読み込めなかった。コピーしたコードをそのまま貼り付けてみて。';
+  }
+});
+
+let spinning = false;
+btn.addEventListener('click', () => {
+  if(spinning) return;
+  const pool = getPool();
+  if(pool === null){
+    updateFilterStatus();
+    return;
+  }
+  spinning = true;
+  card.classList.add('spinning');
+  let i = 0;
+  const flicker = setInterval(() => {
+    const r = pool[Math.floor(Math.random()*pool.length)];
+    current = r;
+    i++;
+    if(i > 8){
+      clearInterval(flicker);
+      card.classList.remove('spinning');
+      renderCard(r, true);
+      spinning = false;
+    }
+  }, 70);
+});
+
+savedToggle.addEventListener('click', () => {
+  savedPanel.classList.toggle('open');
+  if(savedPanel.classList.contains('open')) refreshSavedList();
+});
+</script>
+</body>
+</html>
