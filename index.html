@@ -163,34 +163,6 @@
   }
   .empty-note{ font-size: 12.5px; color: #a89a7c; }
 
-  .ai-box{
-    margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(36,29,20,.2);
-  }
-  .ai-box .section-title{ display:flex; align-items:center; gap:6px; }
-  .ai-row{ display:flex; gap:8px; margin-top: 8px; }
-  .ai-row input{
-    flex:1; min-width: 0; border: 1px solid rgba(36,29,20,.25); border-radius: 10px; padding: 9px 10px;
-    font-family: inherit; font-size: 13px; background: #fff;
-  }
-  .ai-row button{
-    appearance:none; border:none; background: var(--ink); color: var(--paper);
-    font-family: inherit; font-weight: 700; font-size: 12.5px; padding: 0 16px;
-    border-radius: 10px; cursor:pointer; flex-shrink: 0; white-space: nowrap;
-  }
-  .ai-row button:disabled{ opacity:.5; cursor:default; }
-  .ai-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top: 8px; }
-  .ai-chip{
-    font-size: 11.5px; border: 1px solid rgba(36,29,20,.2); background: rgba(255,255,255,.5);
-    border-radius: 100px; padding: 4px 10px; cursor:pointer; color: var(--ink-soft);
-  }
-  .ai-answer{
-    margin-top: 10px; font-size: 13px; line-height: 1.65; background: rgba(255,255,255,.55);
-    border-radius: 10px; padding: 10px 12px; white-space: pre-wrap; display:none;
-  }
-  .ai-answer.show{ display:block; }
-  .ai-loading{ font-size: 12.5px; color: var(--ink-soft); margin-top: 8px; display:none; }
-  .ai-loading.show{ display:block; }
-
   footer{ margin-top: 36px; font-size: 10.5px; color: #6b604c; text-align:center; letter-spacing: .05em; }
 </style>
 </head>
@@ -563,88 +535,9 @@ function renderCard(item, withDetails){
       <button class="mini-btn" id="saveBtn">♡ 保存する</button>
     </div>
     <div id="saveError" style="color:#c0392b; font-size:11.5px; margin-top:6px; display:none;"></div>
-    <div class="ai-box">
-      <div class="section-title">🤖 分からないことをAIに聞く</div>
-      <div class="ai-chips">
-        <span class="ai-chip" data-q="この材料で分からない単語があれば説明して">用語を説明して</span>
-        <span class="ai-chip" data-q="家にありそうな代わりの材料を教えて">代用できる材料は？</span>
-        <span class="ai-chip" data-q="辛さや味を控えめにするならどう変える？">味を調整するには？</span>
-      </div>
-      <div class="ai-row">
-        <input type="text" id="aiInput" placeholder="例：甜麺醤って何？味噌で代用できる？">
-        <button id="aiSend">聞く</button>
-      </div>
-      <div class="ai-loading" id="aiLoading">考え中…</div>
-      <div class="ai-answer" id="aiAnswer"></div>
-    </div>
   `;
   document.getElementById('saveBtn').addEventListener('click', () => saveRecipe(item));
   checkSaved(item.id);
-
-  const aiInput = document.getElementById('aiInput');
-  const aiSend = document.getElementById('aiSend');
-  document.querySelectorAll('.ai-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      aiInput.value = chip.dataset.q;
-      askAI(item, chip.dataset.q);
-    });
-  });
-  aiSend.addEventListener('click', () => {
-    const q = aiInput.value.trim();
-    if(q) askAI(item, q);
-  });
-  aiInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter'){
-      const q = aiInput.value.trim();
-      if(q) askAI(item, q);
-    }
-  });
-}
-
-async function askAI(item, question){
-  const loading = document.getElementById('aiLoading');
-  const answerBox = document.getElementById('aiAnswer');
-  const sendBtn = document.getElementById('aiSend');
-  if(!loading || !answerBox) return;
-
-  loading.classList.add('show');
-  answerBox.classList.remove('show');
-  sendBtn.disabled = true;
-
-  const recipeContext = `料理名: ${item.jp}（${item.en}）
-材料: ${item.ing.map(([n,a]) => `${n} ${a}`).join('、')}
-作り方: ${item.steps.join(' / ')}`;
-
-  try{
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 1000,
-        messages: [
-          {
-            role: "user",
-            content: `あなたは料理のアシスタントです。次のレシピについてのユーザーの質問に、日本語で簡潔に（3〜5文程度で）答えてください。専門用語はやさしく言い換え、代用食材の提案では家庭にありがちなもの、または近所のスーパーで買えるものを優先してください。\n\n【レシピ情報】\n${recipeContext}\n\n【質問】\n${question}`
-          }
-        ]
-      })
-    });
-    const data = await response.json();
-    const text = (data.content || [])
-      .filter(b => b.type === "text")
-      .map(b => b.text)
-      .join("\n")
-      .trim();
-    answerBox.textContent = text || "うまく答えられなかった…もう一度質問してみて。";
-  }catch(e){
-    answerBox.textContent = "エラーが発生したよ。もう一度試してみてね。";
-    console.error("AI request failed", e);
-  }finally{
-    loading.classList.remove('show');
-    answerBox.classList.add('show');
-    sendBtn.disabled = false;
-  }
 }
 
 function saveRecipe(item){
